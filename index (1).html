@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Portal Kampus Fiktif - Lab Keamanan Web</title>
+<style>
+:root{--bg:#eef2f4;--fg:#14213d;--card:#fff;--mut:#5b6678;--ac:#0b7a75;--acfg:#fff;--bd:#d5dbe1;--bad:#b3261e;--warn:#fff4dc;--warnfg:#7a4a00;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1620;--fg:#e6ebf2;--card:#18212d;--mut:#9aa7ba;--ac:#3cc4bb;--acfg:#06201e;--bd:#2a3646;--bad:#ff8a80;--warn:#33280f;--warnfg:#f3cf86}}
+:root[data-theme="dark"]{--bg:#0f1620;--fg:#e6ebf2;--card:#18212d;--mut:#9aa7ba;--ac:#3cc4bb;--acfg:#06201e;--bd:#2a3646;--bad:#ff8a80;--warn:#33280f;--warnfg:#f3cf86}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2{font-family:Georgia,"Times New Roman",serif;margin:0 0 .5rem}
+h1{font-size:1.3rem}h2{font-size:1.25rem}
+header{background:var(--fg);color:var(--bg);padding:.75rem 1rem;display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;justify-content:space-between}
+header small{opacity:.75}
+main{max-width:860px;margin:0 auto;padding:1rem}
+nav{display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:1rem}
+nav a{padding:.4rem .8rem;border-radius:6px;color:var(--fg);text-decoration:none;border:1px solid var(--bd);background:var(--card)}
+nav a.on{background:var(--ac);color:var(--acfg);border-color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:1rem;margin-bottom:1rem}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:.45rem .5rem;border-bottom:1px solid var(--bd);vertical-align:middle}
+input,select,textarea,button{font:inherit;color:inherit}
+input,select,textarea{width:100%;padding:.5rem;border:1px solid var(--bd);border-radius:6px;background:var(--bg);margin:.2rem 0 .6rem}
+td input,td select{margin:0;width:auto;max-width:100%}
+button{padding:.45rem .9rem;border-radius:6px;border:1px solid var(--ac);background:var(--ac);color:var(--acfg);cursor:pointer}
+button.ghost{background:transparent;color:inherit;border-color:currentColor}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+#msg{min-height:1.5rem;margin-bottom:.5rem;font-weight:600}
+#msg.err{color:var(--bad)}
+.note{background:var(--warn);color:var(--warnfg);padding:.6rem .8rem;border-radius:8px;margin-bottom:1rem;font-size:.9rem}
+.post{border-bottom:1px solid var(--bd);padding:.6rem 0}
+.post small,.mut{color:var(--mut)}
+details{margin-bottom:1rem}
+summary{cursor:pointer;font-weight:600}
+code{background:var(--bg);padding:.1rem .3rem;border-radius:4px;word-break:break-all}
+footer{max-width:860px;margin:0 auto;padding:0 1rem 2rem;color:var(--mut);font-size:.85rem}
+.badge{padding:.15rem .5rem;border-radius:99px;font-size:.8rem;border:1px solid currentColor}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Portal Kampus Fiktif</h1><small>Lab latihan keamanan web - data sintetis</small></div>
+  <div><span id="who"></span> <button class="ghost" id="mode" title="Ganti mode"></button></div>
+</header>
+<main>
+  <div class="note">Aplikasi latihan. Semua akun dan data fiktif, tidak terhubung ke server, dan tersimpan hanya di peramban Anda. Jangan memakai kata sandi asli.</div>
+  <nav id="nav"></nav>
+  <div id="msg" role="status"></div>
+  <div id="app"></div>
+  <details class="card">
+    <summary>Panduan latihan: kerentanan di mode Rentan</summary>
+    <ol>
+      <li><b>Stored XSS</b> - di Diskusi, kirim <code>&lt;img src=x onerror=alert('XSS')&gt;</code>; skrip jalan untuk semua pembaca.</li>
+      <li><b>IDOR</b> - masuk sebagai mahasiswa, buka Nilai, lalu ubah alamat menjadi <code>#/nilai/3</code> untuk melihat nilai mahasiswa lain.</li>
+      <li><b>Percobaan sandi tanpa batas</b> - salah memasukkan sandi berkali-kali tidak pernah mengunci akun.</li>
+      <li><b>Validasi berkas lemah</b> - unggah <code>shell.php.jpg</code> atau <code>.html</code>; semuanya diterima.</li>
+      <li><b>Eskalasi hak akses</b> - sebagai mahasiswa, buka <code>#/admin</code> atau <code>#/dosen</code> langsung; ubah peran sendiri atau nilai sendiri.</li>
+    </ol>
+    <p class="mut">Ganti ke mode Aman (tombol di kanan atas) untuk melihat perbaikannya, lalu coba ulang serangan yang sama.</p>
+  </details>
+</main>
+<footer>
+  Belum punya akun? Daftar di halaman masuk, atau pakai akun demo: <code>admin / admin123</code>, <code>dosen1 / dosen123</code>, <code>24000001 / mhs123</code>, <code>24000002 / mhs456</code>.
+  <button class="ghost" id="reset">Reset data</button>
+</footer>
+<script>
+var mem = {};
+var st = {
+  get: function (k, d) { try { var v = localStorage.getItem(k); if (v != null) return JSON.parse(v); } catch (x) {} return k in mem ? mem[k] : d; },
+  set: function (k, v) { mem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (x) {} }
+};
+function seed() {
+  return {
+    users: [
+      {id:1,u:'admin',p:'admin123',role:'admin',name:'Admin Sintetis'},
+      {id:2,u:'dosen1',p:'dosen123',role:'dosen',name:'Dr. Sari Fiktif'},
+      {id:3,u:'24000001',p:'mhs123',role:'mhs',name:'Budi Contoh'},
+      {id:4,u:'24000002',p:'mhs456',role:'mhs',name:'Citra Contoh'}
+    ],
+    grades: [
+      {id:1,uid:3,mk:'Basis Data',n:85},{id:2,uid:3,mk:'Pemrograman Web',n:90},
+      {id:3,uid:4,mk:'Basis Data',n:78},{id:4,uid:4,mk:'Pemrograman Web',n:88}
+    ],
+    subs: [],
+    posts: [{id:1,uid:2,t:'Selamat datang di forum diskusi mata kuliah (data sintetis).'}]
+  };
+}
+var db = st.get('pk_db', null) || seed();
+var mode = st.get('pk_mode', 'vuln');
+var me = st.get('pk_me', null);
+var att = {};
+var $ = function (s) { return document.querySelector(s); };
+function save() { st.set('pk_db', db); }
+function e(s) { return String(s).replace(/[&<>"']/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function U(id) { return db.users.find(function (x) { return x.id == id; }) || {name:'?',u:'?',role:'?'}; }
+function msg(t, bad) { var m = $('#msg'); m.textContent = t || ''; m.className = bad ? 'err' : ''; }
+function can(u, roles) { return mode === 'vuln' || roles.indexOf(u.role) > -1; }
+function deny() { return '<div class="card"><h2>Akses ditolak</h2><p>Peran Anda tidak boleh membuka halaman atau data ini.</p></div>'; }
+
+function loginView() {
+  return '<div class="card"><h2>Masuk</h2><form data-f="login"><label>Nama pengguna / NIM<input name="u" autocomplete="username" required></label>' +
+    '<label>Kata sandi<input name="p" type="password" autocomplete="current-password" required></label><button>Masuk</button></form></div>' +
+    '<div class="card"><h2>Daftar akun baru</h2><p class="mut">Buat akun mahasiswa sendiri, lengkap dengan beberapa nilai acak sintetis.</p><form data-f="register"><label>Nama lengkap<input name="n" required></label><label>Nama pengguna / NIM<input name="u" autocomplete="username" required></label><label>Kata sandi<input name="p" type="password" autocomplete="new-password" required></label><button>Daftar dan masuk</button></form></div>';
+}
+function vNilai(a, u) {
+  if (a) {
+    var g = db.grades.find(function (x) { return x.id == a; });
+    if (!g) return '<div class="card"><p>Data nilai tidak ditemukan.</p><a href="#/nilai">Kembali</a></div>';
+    if (mode === 'safe' && u.role === 'mhs' && g.uid != u.id) return deny();
+    return '<div class="card"><h2>Detail nilai #' + g.id + '</h2><p>Mahasiswa: ' + e(U(g.uid).name) + ' (' + e(U(g.uid).u) + ')</p><p>' + e(g.mk) + ': <b>' + g.n + '</b></p><a href="#/nilai">Kembali ke daftar</a></div>';
+  }
+  var rows = db.grades.filter(function (g) { return u.role !== 'mhs' || g.uid == u.id; }).map(function (g) {
+    return '<tr><td>' + e(U(g.uid).name) + '</td><td>' + e(g.mk) + '</td><td>' + g.n + '</td><td><a href="#/nilai/' + g.id + '">Detail</a></td></tr>';
+  }).join('');
+  return '<div class="card"><h2>Nilai</h2><div class="tw"><table><tr><th>Mahasiswa</th><th>Mata kuliah</th><th>Nilai</th><th></th></tr>' + (rows || '<tr><td colspan="4">Belum ada nilai.</td></tr>') + '</table></div></div>';
+}
+function vTugas(a, u) {
+  var rows = db.subs.filter(function (s) { return u.role !== 'mhs' || s.uid == u.id; }).map(function (s) {
+    return '<tr><td>' + e(U(s.uid).name) + '</td><td>' + e(s.judul) + '</td><td>' + e(s.file) + '</td><td>' + Math.ceil(s.size / 1024) + ' KB</td></tr>';
+  }).join('');
+  var form = u.role === 'mhs' ? '<form data-f="tugas"><label>Judul tugas<input name="j" required></label><label>Berkas<input name="file" type="file" required></label><button>Unggah tugas</button></form><p class="mut">Hanya nama dan ukuran berkas yang dicatat (simulasi, tidak ada penyimpanan di server).</p>' : '';
+  return '<div class="card"><h2>Tugas</h2>' + form + '</div><div class="card"><div class="tw"><table><tr><th>Mahasiswa</th><th>Judul</th><th>Berkas</th><th>Ukuran</th></tr>' + (rows || '<tr><td colspan="4">Belum ada tugas diunggah.</td></tr>') + '</table></div></div>';
+}
+function vDiskusi() {
+  var list = db.posts.slice().reverse().map(function (p) {
+    var body = mode === 'vuln' ? p.t : e(p.t);
+    return '<div class="post"><small>' + e(U(p.uid).name) + '</small><div>' + body + '</div></div>';
+  }).join('');
+  return '<div class="card"><h2>Diskusi</h2><form data-f="post"><label>Pesan baru<textarea name="t" rows="3" required></textarea></label><button>Kirim pesan</button></form></div><div class="card">' + list + '</div>';
+}
+function vDosen(a, u) {
+  if (!can(u, ['dosen', 'admin'])) return deny();
+  var rows = db.grades.map(function (g) {
+    return '<tr><td>' + e(U(g.uid).name) + '</td><td>' + e(g.mk) + '</td><td><input type="number" min="0" max="100" value="' + g.n + '" id="n' + g.id + '"></td><td><button data-act="setg" data-id="' + g.id + '">Simpan nilai</button></td></tr>';
+  }).join('');
+  return '<div class="card"><h2>Penilaian</h2><div class="tw"><table><tr><th>Mahasiswa</th><th>Mata kuliah</th><th>Nilai</th><th></th></tr>' + rows + '</table></div></div>';
+}
+function vAdmin(a, u) {
+  if (!can(u, ['admin'])) return deny();
+  var rows = db.users.map(function (x) {
+    var opts = ['mhs', 'dosen', 'admin'].map(function (r) { return '<option' + (r === x.role ? ' selected' : '') + '>' + r + '</option>'; }).join('');
+    return '<tr><td>' + e(x.name) + '</td><td>' + e(x.u) + '</td><td><select id="r' + x.id + '">' + opts + '</select></td><td><button data-act="role" data-id="' + x.id + '">Simpan peran</button> <button class="ghost" data-act="del" data-id="' + x.id + '">Hapus</button></td></tr>';
+  }).join('');
+  return '<div class="card"><h2>Kelola akun</h2><div class="tw"><table><tr><th>Nama</th><th>Pengguna</th><th>Peran</th><th></th></tr>' + rows + '</table></div></div>' +
+    '<div class="card"><h2>Tambah akun</h2><form data-f="adduser"><label>Nama<input name="n" required></label><label>Nama pengguna<input name="u" required></label><label>Kata sandi<input name="p" required></label><label>Peran<select name="r"><option>mhs</option><option>dosen</option><option>admin</option></select></label><button>Tambah akun</button></form></div>';
+}
+var V = {nilai: vNilai, tugas: vTugas, diskusi: vDiskusi, dosen: vDosen, admin: vAdmin};
+
+function render() {
+  var parts = (location.hash.slice(2) || 'nilai').split('/');
+  var r = parts[0], a = parts[1];
+  var u = me ? db.users.find(function (x) { return x.id == me; }) : null;
+  $('#mode').textContent = 'Mode: ' + (mode === 'vuln' ? 'Rentan' : 'Aman');
+  if (!u) { me = null; $('#who').innerHTML = ''; $('#nav').innerHTML = ''; $('#app').innerHTML = loginView(); return; }
+  $('#who').innerHTML = e(u.name) + ' <span class="badge">' + u.role + '</span> <button class="ghost" data-act="logout">Keluar</button>';
+  var items = [['nilai', 'Nilai'], ['tugas', 'Tugas'], ['diskusi', 'Diskusi']];
+  if (u.role !== 'mhs') items.push(['dosen', 'Penilaian']);
+  if (u.role === 'admin') items.push(['admin', 'Akun']);
+  $('#nav').innerHTML = items.map(function (i) { return '<a href="#/' + i[0] + '" class="' + (i[0] === r ? 'on' : '') + '">' + i[1] + '</a>'; }).join('');
+  $('#app').innerHTML = (V[r] || vNilai)(a, u);
+}
+
+document.addEventListener('submit', function (ev) {
+  var f = ev.target; if (!f.dataset.f) return;
+  ev.preventDefault(); msg('');
+  var u = me ? U(me) : null, k = f.dataset.f;
+  if (k === 'login') {
+    var un = f.u.value.trim(), pw = f.p.value, t = att[un] || 0;
+    if (mode === 'safe' && t >= 5) return msg('Akun dikunci setelah 5 percobaan gagal. Muat ulang halaman untuk membuka kunci (simulasi).', true);
+    var x = db.users.find(function (a) { return a.u === un && a.p === pw; });
+    if (!x) { att[un] = t + 1; return msg('Login gagal. Percobaan ke-' + (t + 1) + '.', true); }
+    att[un] = 0; me = x.id; st.set('pk_me', me); location.hash = '#/nilai'; return render();
+  }
+  if (k === 'register') {
+    var nm = f.n.value.trim(), nu = f.u.value.trim(), np = f.p.value;
+    if (!nm || !nu) return msg('Nama dan nama pengguna wajib diisi.', true);
+    if (db.users.some(function (x) { return x.u === nu; })) return msg('Nama pengguna sudah dipakai.', true);
+    var nid = Date.now();
+    db.users.push({id: nid, u: nu, p: np, role: 'mhs', name: nm});
+    ['Basis Data', 'Pemrograman Web'].forEach(function (mk, i) { db.grades.push({id: nid + i + 1, uid: nid, mk: mk, n: 70 + Math.floor(Math.random() * 30)}); });
+    save(); me = nid; st.set('pk_me', me); location.hash = '#/nilai'; return render();
+  }
+  if (!u) return;
+  if (k === 'post') {
+    db.posts.push({id: Date.now(), uid: u.id, t: f.t.value}); save(); return render();
+  }
+  if (k === 'tugas') {
+    var fl = f.file.files[0]; if (!fl) return msg('Pilih berkas terlebih dahulu.', true);
+    if (mode === 'safe') {
+      var p = fl.name.toLowerCase().split('.'), ext = p.pop();
+      if (p.length !== 1 || ['pdf', 'docx', 'zip'].indexOf(ext) < 0 || fl.size > 2e6) return msg('Berkas ditolak: hanya pdf, docx, atau zip; tanpa ekstensi ganda; maksimal 2 MB.', true);
+    }
+    db.subs.push({id: Date.now(), uid: u.id, judul: f.j.value, file: fl.name, size: fl.size}); save(); msg('Tugas diunggah.'); return render();
+  }
+  if (k === 'adduser') {
+    if (!can(u, ['admin'])) return msg('Akses ditolak.', true);
+    db.users.push({id: Date.now(), u: f.u.value.trim(), p: f.p.value, role: f.r.value, name: f.n.value}); save(); msg('Akun ditambahkan.'); return render();
+  }
+});
+
+document.addEventListener('click', function (ev) {
+  var b = ev.target.closest('button'); if (!b) return;
+  if (b.id === 'mode') { mode = mode === 'vuln' ? 'safe' : 'vuln'; st.set('pk_mode', mode); msg('Mode ' + (mode === 'vuln' ? 'Rentan' : 'Aman') + ' aktif.'); return render(); }
+  if (b.id === 'reset') { db = seed(); save(); me = null; st.set('pk_me', null); att = {}; msg('Data dikembalikan ke awal.'); location.hash = '#/'; return render(); }
+  var act = b.dataset.act; if (!act) return;
+  var u = me ? U(me) : null;
+  if (act === 'logout') { me = null; st.set('pk_me', null); return render(); }
+  if (!u) return;
+  var id = b.dataset.id;
+  if (act === 'setg') {
+    if (!can(u, ['dosen', 'admin'])) return msg('Akses ditolak.', true);
+    var v = parseInt($('#n' + id).value, 10); if (isNaN(v) || v < 0 || v > 100) return msg('Nilai harus 0-100.', true);
+    db.grades.find(function (g) { return g.id == id; }).n = v; save(); msg('Nilai disimpan.'); return render();
+  }
+  if (act === 'role' || act === 'del') {
+    if (!can(u, ['admin'])) return msg('Akses ditolak.', true);
+    if (act === 'role') U(id).role = $('#r' + id).value; else db.users = db.users.filter(function (x) { return x.id != id; });
+    save(); msg('Perubahan akun disimpan.'); return render();
+  }
+});
+window.addEventListener('hashchange', function () { msg(''); render(); });
+render();
+</script>
+</body>
+</html>
